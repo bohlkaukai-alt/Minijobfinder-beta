@@ -116,7 +116,6 @@ async function deleteMyAccount() {
 function openDownloadModal() {
     const releaseBase = 'https://github.com/bohlkaukai-alt/Minijobfinder/releases/latest/download';
     const isAndroid = /android/i.test(navigator.userAgent);
-    const isWindows = /win/i.test(navigator.platform);
 
     let platformOptions = '';
     if (isAndroid) {
@@ -129,7 +128,7 @@ function openDownloadModal() {
                 </div>
                 <span class="material-icons download-arrow">add_to_home_screen</span>
             </div>`;
-    } else if (isWindows) {
+    } else {
         platformOptions = `
             <a href="${releaseBase}/MiniJob.Finder.Setup.1.0.0.exe" class="download-option" download>
                 <div class="download-icon">🖥️</div>
@@ -138,25 +137,7 @@ function openDownloadModal() {
                     <span class="small-muted">Installationsdatei (.exe)</span>
                 </div>
                 <span class="material-icons download-arrow">download</span>
-            </a>
-            <div class="download-option download-option-alt" onclick="installPwa(); this.closest('.modal-overlay').remove();">
-                <div class="download-icon">🌐</div>
-                <div class="download-info">
-                    <strong>Im Browser installieren</strong>
-                    <span class="small-muted">Als PWA-App</span>
-                </div>
-                <span class="material-icons download-arrow">add_to_home_screen</span>
-            </div>`;
-    } else {
-        platformOptions = `
-            <div class="download-option download-option-alt" onclick="installPwa(); this.closest('.modal-overlay').remove();">
-                <div class="download-icon">🌐</div>
-                <div class="download-info">
-                    <strong>Im Browser installieren</strong>
-                    <span class="small-muted">Als App installieren</span>
-                </div>
-                <span class="material-icons download-arrow">add_to_home_screen</span>
-            </div>`;
+            </a>`;
     }
 
     const modal = document.createElement('div');

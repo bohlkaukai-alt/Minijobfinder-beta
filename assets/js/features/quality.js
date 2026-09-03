@@ -433,7 +433,6 @@ showProfileScreen = function() {
         <div class="card" onclick="navigateTo('ratings')"><strong>Bewertungen</strong><p class="small-muted">Bewertungen ansehen</p></div>
         <div class="card" onclick="navigateTo('edit-profile')"><strong>Profil bearbeiten</strong></div>
         <div class="card" onclick="navigateTo('settings')"><strong>Einstellungen</strong><p class="small-muted">Datenschutz, Cookies, Design, Feedback</p></div>
-        <div class="card" onclick="openDownloadModal()"><strong>📥 App herunterladen</strong><p class="small-muted">Android oder Windows</p></div>
         <button class="btn btn-danger" onclick="logout()">Abmelden</button>
     </div>`;
 
