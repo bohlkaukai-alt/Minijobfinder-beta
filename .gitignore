@@ -7,6 +7,7 @@ Thumbs.db
 
 # Build-Outputs
 release/
+package-lock.json
 
 # Alte PHP/STRATO-Dateien gehören nicht in die GitHub-Pages-Version
 includes/config.php
