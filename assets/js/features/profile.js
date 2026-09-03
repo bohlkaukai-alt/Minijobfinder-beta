@@ -123,7 +123,7 @@ function openDownloadModal() {
             <h2>📥 App herunterladen</h2>
             <p class="small-muted" style="margin-bottom:16px">Wähle deine Plattform</p>
             <div class="download-options">
-                <a href="${releaseBase}/MiniJob-Finder.apk" class="download-option" download>
+                <a href="${releaseBase}/GitHub-unsigned.apk" class="download-option" download>
                     <div class="download-icon">🤖</div>
                     <div class="download-info">
                         <strong>Android</strong>
