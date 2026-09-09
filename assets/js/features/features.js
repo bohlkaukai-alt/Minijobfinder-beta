@@ -416,7 +416,17 @@ showChatsScreen = function() {
     chatsUnsubscribe = db.collection('chats').where('participants','array-contains',currentUser.uid).onSnapshot(async snap => {
         if (snap.empty) { document.getElementById('main-content').innerHTML = '<div class="empty-state">Noch keine Chats</div>'; return; }
         const chats = snap.docs.map(d => ({ id:d.id, data:d.data() })).sort((a,b)=>(b.data.updatedAt?.toMillis?.()||0)-(a.data.updatedAt?.toMillis?.()||0));
-        const rows = await Promise.all(chats.map(async item => { const c = item.data; const other = await getUserCached(getOtherParticipant(c)); const unread = c.unreadCounts?.[currentUser.uid] || 0; return `<div class="card chat-row ${c.pinnedBy?.[currentUser.uid]?'pinned':''}" onclick="navigateTo('chat','${item.id}')"><div class="chat-avatar" style="background:${escapeHtml(other?.profileColor || '#2563EB')}">${escapeHtml((other?.name||'?').charAt(0).toUpperCase())}</div><div class="chat-row-main"><strong>${escapeHtml(other?.name || c.jobTitle || 'Chat')}</strong><p class="small-muted">${escapeHtml(c.jobTitle || '')}</p><p class="small-muted">${escapeHtml(c.lastMessage || 'Noch keine Nachricht')}</p></div><div class="chat-row-side"><span>${formatRelative(c.updatedAt)}</span>${unread ? `<b class="nav-badge">${unread}</b>` : ''}</div></div>`; }));
+        
+        // Calculate total unread and update nav badge
+        let totalUnread = 0;
+        snap.docs.forEach(d => { totalUnread += Number(d.data().unreadCounts?.[currentUser.uid] || 0); });
+        document.querySelectorAll('[data-page="chats"]').forEach(btn => {
+            let b = btn.querySelector('.nav-badge');
+            if (totalUnread && !b) { b = document.createElement('b'); b.className='nav-badge'; btn.appendChild(b); }
+            if (b) { b.textContent = totalUnread > 99 ? '99+' : String(totalUnread); b.style.display = totalUnread ? 'inline-flex' : 'none'; }
+        });
+        
+        const rows = await Promise.all(chats.map(async item => { const c = item.data; const other = await getUserCached(getOtherParticipant(c)); const unread = c.unreadCounts?.[currentUser.uid] || 0; return `<div class="card chat-row ${c.pinnedBy?.[currentUser.uid]?'pinned':''}" onclick="navigateTo('chat','${item.id}')"><div class="chat-avatar" style="background:${escapeHtml(other?.profileColor || '#2563EB'}">${escapeHtml((other?.name||'?').charAt(0).toUpperCase())}</div><div class="chat-row-main"><strong>${escapeHtml(other?.name || c.jobTitle || 'Chat')}</strong><p class="small-muted">${escapeHtml(c.jobTitle || '')}</p><p class="small-muted">${escapeHtml(c.lastMessage || 'Noch keine Nachricht')}</p></div><div class="chat-row-side"><span>${formatRelative(c.updatedAt)}</span>${unread ? `<b class="nav-badge">${unread > 99 ? '99+' : unread}</b>` : ''}</div></div>`; }));
         document.getElementById('main-content').innerHTML = rows.join('');
     }, err => { document.getElementById('main-content').innerHTML = `<div class="empty-state">Chat-Fehler: ${escapeHtml(err.message)}</div>`; });
 };
