@@ -438,7 +438,10 @@ startChatForJob = async function(jobId, applyMessage = false) {
         if (!job) { showToast('Job nicht gefunden'); return; } 
         if (job.createdBy === currentUser.uid) { showToast('Das ist dein eigener Job'); return; }
         const participants = [currentUser.uid, job.createdBy].sort(); const key = participants.join('_');
-        const existing = await db.collection('chats').where('jobId','==',jobId).where('participantsKey','==',key).limit(1).get().catch(()=>({empty:true,docs:[]})); 
+        // Query only by jobId (no composite index needed - filter participantsKey client-side)
+        const existingSnap = await db.collection('chats').where('jobId','==',jobId).limit(50).get().catch(()=>({empty:true,docs:[]})); 
+        const existingDocs = existingSnap.docs.filter(d => d.data().participantsKey === key);
+        const existing = { empty: existingDocs.length === 0, docs: existingDocs.map(d => ({ id: d.id, data: d.data() })) }; 
         let chatId;
         if (!existing.empty) chatId = existing.docs[0].id; 
         else { 
