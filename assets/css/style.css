@@ -261,10 +261,13 @@ h2 {
 .job-category {
     background: rgba(249, 115, 22, 0.13);
     color: var(--accent-orange);
-    padding: 3px 8px;
-    font-size: 10px;
+    padding: 3px 8px !important;
+    font-size: 10px !important;
+    line-height: 1.2;
     border: 1px solid rgba(249, 115, 22, 0.16);
-    max-width: 140px;
+    max-width: 130px !important;
+    width: auto !important;
+    height: auto !important;
     overflow: hidden;
     text-overflow: ellipsis;
     flex-shrink: 0;
@@ -903,13 +906,22 @@ body[data-device="tablet"] .map-container {
     justify-content: space-between;
     gap: 10px;
     align-items: flex-start;
+    min-width: 0;
+}
+.job-card-top > strong {
+    min-width: 0;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .job-category {
     background: color-mix(in srgb, var(--cat, var(--accent-orange)) 18%, transparent);
     color: var(--cat, var(--accent-orange));
-    max-width: 140px;
+    max-width: 130px !important;
     overflow: hidden;
     text-overflow: ellipsis;
+    padding: 3px 8px !important;
+    font-size: 10px !important;
 }
 .status-done { background: rgba(100,116,139,.16); color: #64748B; }
 .job-desc { font-size: 13px; color: var(--text-secondary); margin: 10px 0; }
