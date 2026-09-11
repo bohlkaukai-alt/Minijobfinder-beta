@@ -2,7 +2,7 @@
 const ADMIN_CONFIG = {
     // Repository, dessen GitHub-Collaborators Admin-Zugriff erhalten sollen.
     repoOwner: "bohlkaukai-alt",
-    repoName: "bohlkaukai-alt.github.io",
+    repoName: "Minijobfinder-beta",
 
     // Optionaler Fallback für Entwicklung. Sicherer ist Firestore oder GitHub-Collaborator-Prüfung.
     allowedGithubEmails: [
