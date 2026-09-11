@@ -559,3 +559,61 @@ Umgesetzt:
 
 Hinweis:
 Da eine reine GitHub-Pages-Website keine eigene Serverlogik hat, kann ein offizieller Wert nicht immer zuverlässig direkt aus Behörden-Webseiten ausgelesen werden, wenn CORS oder Netzwerkzugriff blockiert. Deshalb gibt es zusätzlich die lokale Fallback-Datei `assets/data/minijob-limit-fallback.json`.
+
+## Update: index.html repariert
+
+Geändert:
+- `index.html`
+- `assets/js/minijob-limit.js`
+- `assets/js/security-quality.js`
+- `sw.js`
+- `README.md`
+
+Umgesetzt:
+- `index.html` wurde sauber neu aufgebaut.
+- Script-Reihenfolge wurde stabilisiert.
+- Doppelte/fehleranfällige Initialisierung im Kopfbereich wurde bereinigt.
+- `minijob-limit.js` wurde robuster gemacht, damit ein fehlgeschlagener Online-Abruf die Startseite nicht beschädigt.
+- Fallback-Funktionen ergänzt, damit die Seite nicht abstürzt, falls ein vorheriges Skript nicht vollständig geladen wurde.
+- Service-Worker-Version erhöht, damit Browser nicht die kaputte alte Datei aus dem Cache verwenden.
+
+## Update: E-Mail-Bestätigung Layout-Fix
+
+Geändert:
+- `index.html`
+- `assets/js/security-quality.js`
+- `assets/css/style.css`
+- `sw.js`
+- `README.md`
+
+Umgesetzt:
+- Die E-Mail-Bestätigungsseite nutzt jetzt wieder das App-Layout.
+- Kritische Fallback-CSS wurde direkt in `index.html` ergänzt, damit die Seite nicht mehr im Browser-Standarddesign erscheint.
+- Die untere Navigation wird auf der E-Mail-Bestätigungsseite hart ausgeblendet.
+- Die Bestätigungsbuttons sind mobil sauber untereinander angeordnet.
+- Service-Worker-Version erhöht, damit alte kaputte Cache-Dateien ersetzt werden.
+
+## Update: Mobile Optimierung
+
+Geändert:
+- `assets/css/style.css`
+- `index.html`
+- `assets/js/device.js`
+- `assets/js/social.js`
+- `sw.js`
+- `README.md`
+
+Umgesetzt:
+- Handy-Layout für iPhone und Android verbessert.
+- Untere Navigation als moderne mobile App-Navigation optimiert.
+- Header mobil sticky und kompakter gemacht.
+- Karten, Job-Karten und Profilkarten mobil besser skaliert.
+- Formulare und Buttons fingerfreundlicher gemacht.
+- Eingabefelder verwenden mobil 16 px Schriftgröße, damit iOS nicht automatisch hineinzoomt.
+- Kartenansicht nutzt die verfügbare Handyhöhe besser.
+- Modale Fenster erscheinen mobil als Bottom-Sheet.
+- Chat-Ansicht blendet die Navigation zuverlässiger aus.
+- E-Mail-Bestätigungsseite und Passwortseiten mobil besser angepasst.
+- Footer-Links mobil kompakter gemacht.
+- Admin-Seite mobil nutzbarer gemacht.
+- Service-Worker-Version erhöht.
