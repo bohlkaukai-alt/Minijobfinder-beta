@@ -37,10 +37,7 @@
             background: linear-gradient(135deg, var(--bg), var(--bg-2));
             color: var(--text);
         }
-        body.verify-email-mode .bottom-nav,
-        body.verify-email-mode #bottom-nav {
-            display: none !important;
-        }
+        /* E-Mail-Verifizierung deaktiviert: kein verify-email-mode Zwang mehr. */
         #app {
             min-height: 100vh;
             width: min(100%, 1180px);
@@ -193,7 +190,6 @@
                 box-shadow: 0 18px 48px rgba(15, 23, 42, 0.22);
             }
             .bottom-nav.hidden,
-            body.verify-email-mode .bottom-nav,
             body.is-chat-open .bottom-nav {
                 display: none !important;
             }
