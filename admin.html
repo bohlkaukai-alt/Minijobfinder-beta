@@ -28,7 +28,10 @@
                 <span class="material-icons" style="vertical-align:middle">login</span>
                 Mit GitHub anmelden
             </button>
-            <p class="admin-help">Voraussetzung: GitHub-Anbieter in Firebase Authentication aktivieren und den Nutzer in Firestore unter <code>admins/&lt;uid&gt;</code> freischalten.</p>
+            <p class="admin-help">Voraussetzung: GitHub-Anbieter in Firebase Authentication aktivieren. Zugriff erhalten konfigurierte Firestore-Admins oder GitHub-Collaborators des Repositories.</p>
+            <div class="admin-help github-repo-config">
+                Repository: <code id="admin-repo-label">bohlkaukai-alt/bohlkaukai-alt.github.io</code>
+            </div>
         </section>
 
         <section id="admin-denied-card" class="card admin-denied-card hidden">
@@ -90,6 +93,6 @@
         appId: "1:910969132661:web:1507192ed39cd897db4a3c"
     };</script>
 <script src="assets/js/minijob-limit.js"></script>
-<script src="assets/js/admin.js"></script>
+<script src="assets/js/admin.js?v=v17"></script>
 </body>
 </html>
