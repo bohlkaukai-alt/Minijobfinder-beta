@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Admin – MiniJob Finder</title>
+    <meta name="theme-color" content="#2563EB">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-theme="light" data-device="desktop">
+<main class="admin-page">
+    <section class="admin-shell">
+        <header class="admin-topbar">
+            <div>
+                <a class="legal-back" href="index.html">← Zurück zur App</a>
+                <h1>Admin-Bereich</h1>
+                <p class="small-muted">Jobs prüfen, verwalten und mit Grund löschen.</p>
+            </div>
+            <div id="admin-user-box"></div>
+        </header>
+
+        <section id="admin-login-card" class="card admin-login-card">
+            <h2>Admin-Anmeldung</h2>
+            <p class="small-muted">Dieser Bereich ist nur für konfigurierte Admins. Die Anmeldung erfolgt über GitHub.</p>
+            <button class="btn btn-primary" onclick="adminSignInWithGithub()">
+                <span class="material-icons" style="vertical-align:middle">login</span>
+                Mit GitHub anmelden
+            </button>
+            <p class="admin-help">Voraussetzung: GitHub-Anbieter in Firebase Authentication aktivieren und den Nutzer in Firestore unter <code>admins/&lt;uid&gt;</code> freischalten.</p>
+        </section>
+
+        <section id="admin-denied-card" class="card admin-denied-card hidden">
+            <h2>Kein Admin-Zugriff</h2>
+            <p>Die GitHub-Anmeldung war erfolgreich, aber für diesen Account ist keine Admin-Berechtigung hinterlegt.</p>
+            <p class="small-muted">Lege in Firestore ein Dokument <code>admins/&lt;Firebase-UID&gt;</code> mit <code>enabled: true</code> an.</p>
+            <button class="btn btn-outline" onclick="adminLogout()">Abmelden</button>
+        </section>
+
+        <section id="admin-dashboard" class="hidden">
+            <div class="admin-toolbar card">
+                <div>
+                    <label class="small-muted">Suche</label>
+                    <input id="admin-search" class="form-input" placeholder="Titel, Ort, Beschreibung, Ersteller..." oninput="renderAdminJobs()">
+                </div>
+                <div>
+                    <label class="small-muted">Status</label>
+                    <select id="admin-status-filter" class="form-input" onchange="renderAdminJobs()">
+                        <option value="all">Alle</option>
+                        <option value="offen">Offen</option>
+                        <option value="reserviert">Reserviert</option>
+                        <option value="erledigt">Erledigt</option>
+                        <option value="deleted">Gelöscht</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="small-muted">Sortierung</label>
+                    <select id="admin-sort" class="form-input" onchange="renderAdminJobs()">
+                        <option value="newest">Neueste zuerst</option>
+                        <option value="oldest">Älteste zuerst</option>
+                        <option value="title">Titel A–Z</option>
+                    </select>
+                </div>
+                <button class="btn btn-accent" onclick="loadAdminJobs()">Aktualisieren</button>
+                <button class="btn btn-outline" onclick="adminOpenBanEmailModal()">E-Mail sperren</button>
+            </div>
+
+            <div class="admin-stats-grid">
+                <div class="card"><strong id="admin-stat-total">0</strong><span>Jobs gesamt</span></div>
+                <div class="card"><strong id="admin-stat-open">0</strong><span>Offen</span></div>
+                <div class="card"><strong id="admin-stat-deleted">0</strong><span>Gelöscht</span></div>
+            </div>
+
+            <div class="card admin-limit-info" style="cursor:auto">Aktuelles Minijob-Monatslimit: <strong data-minijob-limit>603 €</strong><br><span class="small-muted" data-minijob-limit-source>Fallback</span></div>
+            <div id="admin-job-list" class="admin-job-list"><div class="spinner"></div></div>
+        </section>
+    </section>
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script>window.MINIJOB_FIREBASE_CONFIG = {
+        apiKey: "AIzaSyBx57dh1O6NoLahmoYFSm0byLzzyKJKhj8",
+        authDomain: "minijob-41400.firebaseapp.com",
+        projectId: "minijob-41400",
+        storageBucket: "minijob-41400.firebasestorage.app",
+        messagingSenderId: "910969132661",
+        appId: "1:910969132661:web:1507192ed39cd897db4a3c"
+    };</script>
+<script src="assets/js/minijob-limit.js"></script>
+<script src="assets/js/admin.js"></script>
+</body>
+</html>
