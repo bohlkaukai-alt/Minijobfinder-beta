@@ -710,14 +710,6 @@ body[data-device="tablet"] #app {
     height: calc(100vh - 28px);
     border-radius: 32px;
     border: 1px solid var(--border);
-    overflow: hidden;
-}
-
-html[data-device="tablet"] .main-content,
-body[data-device="tablet"] .main-content {
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
 }
 
 html[data-device="tablet"] .device-pill,
@@ -2750,4 +2742,11 @@ body.verify-email-mode #bottom-nav {
     .btn {
         font-size: 14px;
     }
+}
+
+
+/* ---------- Remove Email Verification Update ---------- */
+/* E-Mail-Verifizierung ist deaktiviert. */
+body.verify-email-mode {
+    display: block;
 }
