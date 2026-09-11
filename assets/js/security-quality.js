@@ -37,7 +37,7 @@ const ILLEGAL_JOB_RULES = [
 ];
 
 function normalizeEmailForBan(email) {
-    const raw = normalizeEmail ? normalizeEmail(email) : String(email || '').trim().toLowerCase();
+    const raw = (typeof normalizeEmail === 'function' ? normalizeEmail(email) : String(email || '').trim().toLowerCase());
     const parts = raw.split('@');
     if (parts.length !== 2) return raw;
     let local = parts[0];
@@ -72,7 +72,7 @@ async function checkEmailBan(email) {
 
 // Überschreibt die bisherige Blacklist-Prüfung: jetzt Whitelist + Disposable-Block + Plus-Alias-Hinweis.
 validateEmailStrict = function(email) {
-    const value = normalizeEmail(email);
+    const value = (typeof normalizeEmail === 'function' ? normalizeEmail(email) : String(email || '').trim().toLowerCase());
     if (!value) return { valid: false, message: 'Bitte E-Mail-Adresse eingeben.' };
     if (value.length > 254) return { valid: false, message: 'Die E-Mail-Adresse ist zu lang.' };
     if (/\s/.test(value)) return { valid: false, message: 'Die E-Mail-Adresse darf keine Leerzeichen enthalten.' };

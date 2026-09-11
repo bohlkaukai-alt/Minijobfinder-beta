@@ -15,11 +15,11 @@ window.MINIJOB_LIMIT_STATE = {
 const MINIJOB_LIMIT_REMOTE_SOURCES = [
     {
         name: 'Minijob-Zentrale',
-        url: 'https://r.jina.ai/http://r.jina.ai/http://https://www.minijob-zentrale.de/DE/die-minijobs/die-minijobs_node.html'
+        url: 'https://r.jina.ai/http://www.minijob-zentrale.de/DE/die-minijobs/die-minijobs_node.html'
     },
     {
         name: 'Bundesregierung',
-        url: 'https://r.jina.ai/http://r.jina.ai/http://https://www.bundesregierung.de/breg-de/aktuelles/mindestlohn-faq-1688186'
+        url: 'https://r.jina.ai/http://www.bundesregierung.de/breg-de/aktuelles/mindestlohn-faq-1688186'
     }
 ];
 
@@ -157,17 +157,30 @@ function updateMinijobLimitUi() {
     });
 }
 
+function minijobLimitEscapeHtml(str) {
+    if (typeof escapeHtml === 'function') return escapeHtml(str);
+    return String(str || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+}
+
 function minijobLimitHintMarkup() {
     const state = getCurrentMinijobLimitSync();
     return `<div class="minijob-limit-hint">
         Aktuelles Minijob-Monatslimit: <strong data-minijob-limit>${state.monthlyLimitEuro} €</strong>
-        <small data-minijob-limit-source>${escapeHtml(state.source || '')}</small>
+        <small data-minijob-limit-source>${minijobLimitEscapeHtml(state.source || '')}</small>
     </div>`;
+}
+
+function parsePaymentValueSafe(value) {
+    if (typeof parsePaymentValue === 'function') return parsePaymentValue(value);
+    const raw = String(value || '').trim().replace(',', '.');
+    const match = raw.match(/-?\d+(?:\.\d{1,2})?/);
+    if (!match) return NaN;
+    return Number(match[0]);
 }
 
 // Zahlungsprüfung überschreiben: kein festes 500-€-Limit mehr.
 validatePaymentInput = function(value) {
-    const amount = parsePaymentValue(value);
+    const amount = parsePaymentValueSafe(value);
     const state = getCurrentMinijobLimitSync();
     const limit = Number(state.monthlyLimitEuro || 603);
 
