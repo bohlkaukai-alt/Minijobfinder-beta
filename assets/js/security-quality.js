@@ -354,16 +354,12 @@ if (typeof register === 'function' && !register.__secureWrapped) {
         const result = await oldRegisterSecure.apply(this, arguments);
 
         try {
-            if (auth.currentUser && !auth.currentUser.emailVerified) {
-                await auth.currentUser.sendEmailVerification();
-                showToast('Bitte bestätige deine E-Mail-Adresse.');
-            }
             if (auth.currentUser) {
                 const canonical = normalizeEmailForBan(auth.currentUser.email);
                 const hash = await sha256Hex(canonical);
                 await db.collection('users').doc(auth.currentUser.uid).set({
                     emailCanonicalHash: hash,
-                    emailVerified: auth.currentUser.emailVerified === true
+                    emailVerificationDisabled: true
                 }, { merge:true });
             }
         } catch(e) {}
@@ -372,64 +368,12 @@ if (typeof register === 'function' && !register.__secureWrapped) {
     register.__secureWrapped = true;
 }
 
-// Login: E-Mail-Verifizierung erzwingen.
-if (typeof afterSuccessfulAuth === 'function' && !afterSuccessfulAuth.__emailVerifyWrapped) {
-    const oldAfterSuccessfulAuthVerify = afterSuccessfulAuth;
-    afterSuccessfulAuth = async function() {
-        try {
-            if (auth.currentUser && auth.currentUser.providerData.some(p => p.providerId === 'password') && !auth.currentUser.emailVerified) {
-                currentUser = auth.currentUser;
-                document.body.classList.add('verify-email-mode');
-                const nav = document.getElementById('bottom-nav');
-                if (nav) {
-                    nav.classList.add('hidden');
-                    nav.style.display = 'none';
-                }
-                const header = document.getElementById('app-header-container');
-                if (header) header.innerHTML = '';
-                document.getElementById('main-content').innerHTML = `<div class="form-page verify-email-page">
-                    <div class="card verify-email-card" style="cursor:auto">
-                        <h2>E-Mail bestätigen</h2>
-                        <p>Du musst deine E-Mail-Adresse bestätigen, bevor du die App benutzen kannst.</p>
-                        <div class="verify-status-box">
-                            <strong>Angemeldete E-Mail</strong>
-                            <p class="small-muted">${escapeHtml(auth.currentUser.email || '')}</p>
-                        </div>
-                        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin:12px 0;text-align:left;font-size:13px">
-                            <strong>Checklisten:</strong>
-                            <ul style="margin:6px 0 0 16px;padding:0;line-height:1.7">
-                                <li>Posteingang prüfen</li>
-                                <li style="color:var(--accent-orange)">⚠️ <strong>Spam-/Junk-Ordner</strong> prüfen</li>
-                                <li>E-Mail-Adresse auf Tippfehler prüfen</li>
-                            </ul>
-                        </div>
-                        <div class="verification-actions">
-                            <button class="btn btn-primary" onclick="resendVerificationMail()">Bestätigung erneut senden</button>
-                            <button class="btn btn-outline" onclick="auth.currentUser.reload().then(()=>location.reload())">Ich habe bestätigt</button>
-                            <button class="btn btn-danger" onclick="logout()">Abmelden</button>
-                        </div>
-                    </div>
-                </div>`;
-                return;
-            }
-        } catch(e) {}
-        return oldAfterSuccessfulAuthVerify.apply(this, arguments);
-    };
-    afterSuccessfulAuth.__emailVerifyWrapped = true;
-}
-async function resendVerificationMail() {
-    try {
-        await auth.currentUser?.sendEmailVerification();
-        showToast('Bestätigungsmail wurde gesendet.');
-    } catch(e) {
-        showToast('Mail konnte nicht gesendet werden.');
-    }
-}
+// E-Mail-Verifizierung deaktiviert, damit keine automatischen System-Mails versendet werden.
 
 // Reputations-Meter: einfache Anzeige im Profil.
 function reputationScoreFromUser(user, ratingAvg = 0, ratingCount = 0) {
     let score = 40;
-    if (user?.emailVerified) score += 20;
+    score += 10; // Grundvertrauen für registrierten Account, ohne E-Mail-Verifizierungszwang
     score += Math.min(25, ratingAvg * 5);
     score += Math.min(15, ratingCount * 3);
     return Math.max(0, Math.min(100, Math.round(score)));
