@@ -95,7 +95,15 @@ function showVerificationScreen(email) {
             <div class="login-card" style="text-align:center">
                 <div class="login-logo">✉️</div>
                 <h2 class="login-title"><span class="brand-gradient">E-Mail</span> bestätigen</h2>
-                <p class="login-subtitle">Wir haben einen Bestätigungslink an <strong>${escapeHtml(email)}</strong> gesendet. Prüfe deinen Posteingang (und Spam-Ordner).</p>
+                <p class="login-subtitle">Wir haben einen Bestätigungslink an <strong>${escapeHtml(email)}</strong> gesendet.</p>
+                <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin:12px 0;text-align:left;font-size:13px">
+                    <strong>Checklisten:</strong>
+                    <ul style="margin:6px 0 0 16px;padding:0;line-height:1.7">
+                        <li>Posteingang prüfen</li>
+                        <li style="color:var(--accent-orange)">⚠️ <strong>Spam-/Junk-Ordner</strong> prüfen</li>
+                        <li>E-Mail-Adresse auf Tippfehler prüfen</li>
+                    </ul>
+                </div>
                 <button class="btn btn-accent" onclick="resendVerification()" style="margin-top:12px">Erneut senden</button>
                 <button class="btn btn-outline" onclick="checkVerificationAndContinue()" style="margin-top:8px">Ich habe bestätigt → Weiter</button>
                 <button class="btn btn-outline" onclick="showLoginScreen()" style="margin-top:8px">Zurück zum Login</button>

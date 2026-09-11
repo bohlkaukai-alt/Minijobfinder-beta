@@ -395,9 +395,14 @@ if (typeof afterSuccessfulAuth === 'function' && !afterSuccessfulAuth.__emailVer
                             <strong>Angemeldete E-Mail</strong>
                             <p class="small-muted">${escapeHtml(auth.currentUser.email || '')}</p>
                         </div>
-                        <p class="small-muted">
-                            Öffne dein E-Mail-Postfach, klicke auf den Bestätigungslink und komme danach hierher zurück.
-                        </p>
+                        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin:12px 0;text-align:left;font-size:13px">
+                            <strong>Checklisten:</strong>
+                            <ul style="margin:6px 0 0 16px;padding:0;line-height:1.7">
+                                <li>Posteingang prüfen</li>
+                                <li style="color:var(--accent-orange)">⚠️ <strong>Spam-/Junk-Ordner</strong> prüfen</li>
+                                <li>E-Mail-Adresse auf Tippfehler prüfen</li>
+                            </ul>
+                        </div>
                         <div class="verification-actions">
                             <button class="btn btn-primary" onclick="resendVerificationMail()">Bestätigung erneut senden</button>
                             <button class="btn btn-outline" onclick="auth.currentUser.reload().then(()=>location.reload())">Ich habe bestätigt</button>

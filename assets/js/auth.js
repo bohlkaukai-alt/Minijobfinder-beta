@@ -221,7 +221,7 @@ async function login() {
         await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
         await auth.signInWithEmailAndPassword(e, p);
         const u = auth.currentUser;
-        if (u && !u.emailVerified) { showToast('⚠️ E-Mail noch nicht bestätigt. Prüfe deinen Posteingang.'); }
+        if (u && !u.emailVerified) { showToast('⚠️ E-Mail noch nicht bestätigt. Prüfe Posteingang & Spam-Ordner.'); }
     } catch(err) {
         showInlineAuthError(getAuthErrorMessage(err));
     } finally {
