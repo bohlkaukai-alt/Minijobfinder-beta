@@ -7,7 +7,8 @@ const ADMIN_CONFIG = {
     // Optionaler Fallback für Entwicklung. Sicherer ist Firestore oder GitHub-Collaborator-Prüfung.
     allowedGithubEmails: [
         "bohlkaukai@gmail.com",
-        "kai16boehlkau@gmail.com"
+        "kai16boehlkau@gmail.com",
+        "fabi.nikolopulos@icloud.com"
     ]
 };
 
