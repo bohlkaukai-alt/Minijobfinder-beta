@@ -1,0 +1,19 @@
+{
+  "source": "Lokaler Fallback anhand offizieller Werte",
+  "lastUpdated": "2026-09-11",
+  "limits": [
+    {
+      "from": "2026-01-01",
+      "monthlyLimitEuro": 603,
+      "yearlyLimitEuro": 7236,
+      "minimumWageEuro": 13.9,
+      "sourceLabel": "Minijob-Zentrale / Bundesregierung 2026"
+    },
+    {
+      "from": "2027-01-01",
+      "monthlyLimitEuro": 633,
+      "minimumWageEuro": 14.6,
+      "sourceLabel": "Bundesregierung 2027 angekündigt"
+    }
+  ]
+}
