@@ -1,6 +1,10 @@
 // ---------- MiniJob Finder Admin-Bereich ----------
 const ADMIN_CONFIG = {
-    // Optionaler Fallback für Entwicklung. Sicher ist Firestore: admins/<Firebase-UID>.
+    // Repository, dessen GitHub-Collaborators Admin-Zugriff erhalten sollen.
+    repoOwner: "bohlkaukai-alt",
+    repoName: "bohlkaukai-alt.github.io",
+
+    // Optionaler Fallback für Entwicklung. Sicherer ist Firestore oder GitHub-Collaborator-Prüfung.
     allowedGithubEmails: [
         "bohlkaukai@gmail.com",
         "kai16boehlkau@gmail.com"
@@ -62,9 +66,61 @@ function renderAdminUserBox() {
         <button class="icon-circle" onclick="adminLogout()" title="Abmelden"><span class="material-icons">logout</span></button>
     </div>`;
 }
+
+async function getGithubAccessToken() {
+    let token = sessionStorage.getItem('mf_github_access_token') || '';
+    if (token) return token;
+
+    // Ohne Token kann GitHub nicht sicher prüfen, ob jemand Collaborator ist.
+    // Deshalb muss man sich im Zweifel erneut per GitHub anmelden.
+    return '';
+}
+
+async function fetchGithubViewer(token) {
+    const resp = await fetch('https://api.github.com/user', {
+        headers: {
+            'Accept': 'application/vnd.github+json',
+            'Authorization': 'Bearer ' + token
+        }
+    });
+    if (!resp.ok) throw new Error('GitHub-Profil konnte nicht gelesen werden.');
+    return await resp.json();
+}
+
+async function checkGithubRepositoryCollaborator(user) {
+    try {
+        const token = await getGithubAccessToken();
+        if (!token) return { ok: false, reason: 'github-token-missing' };
+
+        const viewer = await fetchGithubViewer(token);
+        const username = viewer.login;
+        if (!username) return { ok: false, reason: 'github-username-missing' };
+
+        const url = `https://api.github.com/repos/${ADMIN_CONFIG.repoOwner}/${ADMIN_CONFIG.repoName}/collaborators/${encodeURIComponent(username)}/permission`;
+        const resp = await fetch(url, {
+            headers: {
+                'Accept': 'application/vnd.github+json',
+                'Authorization': 'Bearer ' + token
+            }
+        });
+
+        if (!resp.ok) return { ok: false, reason: 'not-collaborator-or-no-permission', username };
+
+        const data = await resp.json();
+        const permission = data.permission || '';
+        const allowed = ['admin', 'maintain', 'write', 'triage', 'read'].includes(permission);
+
+        return { ok: allowed, username, permission };
+    } catch (e) {
+        console.warn('GitHub-Collaborator-Prüfung fehlgeschlagen:', e);
+        return { ok: false, reason: e.message || 'github-check-failed' };
+    }
+}
+
 async function isConfiguredAdmin(user) {
     if (!user || !adminProviderIsGithub(user)) return false;
 
+    // 1. Sichere manuelle Freischaltung über Firestore.
     try {
         const doc = await db.collection('admins').doc(user.uid).get();
         if (doc.exists && doc.data()?.enabled === true) {
@@ -75,6 +131,24 @@ async function isConfiguredAdmin(user) {
         console.warn('Admin-Dokument konnte nicht gelesen werden:', e);
     }
 
+    // 2. GitHub-Collaborator-Prüfung für das konfigurierte Repository.
+    const collaborator = await checkGithubRepositoryCollaborator(user);
+    if (collaborator.ok) {
+        adminProfile = {
+            enabled: true,
+            role: 'github-collaborator',
+            github: collaborator.username,
+            permission: collaborator.permission
+        };
+        return true;
+    }
+
+    // Wenn kein Token vorhanden ist, kann eine erneute GitHub-Anmeldung helfen.
+    if (collaborator.reason === 'github-token-missing') {
+        showAdminToast('Bitte erneut mit GitHub anmelden, damit die Collaborator-Berechtigung geprüft werden kann.');
+    }
+
+    // 3. Fallback nur für Entwicklung.
     const email = (user.email || '').toLowerCase();
     const gh = user.providerData.find(p => p.providerId === 'github.com');
     const ghEmail = (gh?.email || '').toLowerCase();
@@ -90,7 +164,9 @@ async function adminSignInWithGithub() {
     provider.addScope('read:user');
     provider.addScope('user:email');
     try {
-        await auth.signInWithPopup(provider);
+        const result = await auth.signInWithPopup(provider);
+        const credential = firebase.auth.GithubAuthProvider.credentialFromResult(result);
+        if (credential?.accessToken) sessionStorage.setItem('mf_github_access_token', credential.accessToken);
     } catch (err) {
         if (err.code === 'auth/popup-blocked' || err.code === 'auth/cancelled-popup-request') {
             await auth.signInWithRedirect(provider);
@@ -111,7 +187,10 @@ async function adminLogout() {
     setAdminVisible('admin-dashboard', false);
     renderAdminUserBox();
 }
-auth.getRedirectResult().catch(() => {});
+auth.getRedirectResult().then(result => {
+    const credential = result ? firebase.auth.GithubAuthProvider.credentialFromResult(result) : null;
+    if (credential?.accessToken) sessionStorage.setItem('mf_github_access_token', credential.accessToken);
+}).catch(() => {});
 auth.onAuthStateChanged(async user => {
     adminUser = user;
     renderAdminUserBox();
