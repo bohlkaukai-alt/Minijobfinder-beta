@@ -84,21 +84,58 @@ register = async function() {
         const r = await auth.createUserWithEmailAndPassword(e, p);
         await ensureUserProfile(r.user, { name: n, email: e, age, city, bio: '', profileColor: '#2563EB' });
         localStorage.setItem('mf_city', city);
-        showToast('Registriert');
+        try { await r.user.sendEmailVerification(); } catch (_) {}
+        showVerificationScreen(e);
     } catch(err) { showInlineAuthError(getAuthErrorMessage(err)); }
     finally { if (btn) { btn.disabled = false; btn.textContent = 'Registrieren'; } }
 };
+function showVerificationScreen(email) {
+    document.getElementById('main-content').innerHTML = `
+        <div class="login-screen">
+            <div class="login-card" style="text-align:center">
+                <div class="login-logo">✉️</div>
+                <h2 class="login-title"><span class="brand-gradient">E-Mail</span> bestätigen</h2>
+                <p class="login-subtitle">Wir haben einen Bestätigungslink an <strong>${escapeHtml(email)}</strong> gesendet. Prüfe deinen Posteingang (und Spam-Ordner).</p>
+                <button class="btn btn-accent" onclick="resendVerification()" style="margin-top:12px">Erneut senden</button>
+                <button class="btn btn-outline" onclick="checkVerificationAndContinue()" style="margin-top:8px">Ich habe bestätigt → Weiter</button>
+                <button class="btn btn-outline" onclick="showLoginScreen()" style="margin-top:8px">Zurück zum Login</button>
+            </div>
+        </div>`;
+}
+async function resendVerification() {
+    try {
+        const user = auth.currentUser;
+        if (user) { await user.sendEmailVerification(); showToast('Bestätigungslink erneut gesendet!'); }
+        else { showToast('Nicht eingeloggt.'); }
+    } catch (err) { showToast('Fehler: ' + getAuthErrorMessage(err)); }
+}
+async function checkVerificationAndContinue() {
+    try {
+        const user = auth.currentUser;
+        if (user) { await user.reload(); }
+        if (user && user.emailVerified) { showToast('E-Mail bestätigt!'); afterSuccessfulAuth(); }
+        else { showToast('E-Mail noch nicht bestätigt. Prüfe deinen Posteingang.'); }
+    } catch (err) { showToast('Fehler: ' + getAuthErrorMessage(err)); }
+}
 const oldAfterSuccessfulAuth = afterSuccessfulAuth;
 afterSuccessfulAuth = function() {
     oldAfterSuccessfulAuth();
+    const nav = document.getElementById('bottom-nav');
+    if (nav) { nav.classList.remove('hidden'); nav.style.display = ''; }
     startUnreadBadgeListener();
     startFeedbackBadgeListener();
-    setTimeout(() => maybeStartTutorial(), 800);
+    setTimeout(() => {
+        maybeStartTutorial();
+        const nav2 = document.getElementById('bottom-nav');
+        if (nav2) { nav2.classList.remove('hidden'); nav2.style.display = ''; }
+    }, 800);
     if (isGuest()) {
-        const createBtn = document.querySelector('[data-page="create"]');
-        const chatBtn = document.querySelector('[data-page="chats"]');
-        if (createBtn) createBtn.style.display = 'none';
-        if (chatBtn) chatBtn.style.display = 'none';
+        setTimeout(() => {
+            const createBtn = document.querySelector('[data-page="create"]');
+            const chatBtn = document.querySelector('[data-page="chats"]');
+            if (createBtn) createBtn.style.display = 'none';
+            if (chatBtn) chatBtn.style.display = 'none';
+        }, 100);
     }
 };
 

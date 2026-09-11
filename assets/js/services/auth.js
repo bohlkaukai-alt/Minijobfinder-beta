@@ -136,7 +136,8 @@ async function login() {
         if (btn) { btn.disabled = true; btn.textContent = 'Wird angemeldet...'; }
         await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
         await auth.signInWithEmailAndPassword(e, p);
-        showToast('Angemeldet');
+        const u = auth.currentUser;
+        if (u && !u.emailVerified) { showToast('⚠️ E-Mail noch nicht bestätigt. Prüfe deinen Posteingang.'); }
     } catch(err) {
         showInlineAuthError(getAuthErrorMessage(err));
     } finally {
@@ -159,7 +160,8 @@ async function register() {
         await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
         const r = await auth.createUserWithEmailAndPassword(e, p);
         await ensureUserProfile(r.user, { name: n, email: e, age });
-        showToast('Registriert');
+        try { await r.user.sendEmailVerification(); } catch (_) {}
+        showToast('Registriert! Bestätige deine E-Mail.');
     } catch(err) {
         showInlineAuthError(getAuthErrorMessage(err));
     } finally {
