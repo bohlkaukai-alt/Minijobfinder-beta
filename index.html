@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Poppins:wght@600;700;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/style.css?v=v17">
 
     <style id="critical-app-fallback-css">
         :root {
@@ -262,6 +262,30 @@
         })();
     </script>
 </head>
+
+<script id="verify-email-removal-boot">
+(function () {
+    try {
+        document.documentElement.classList.remove('verify-email-mode');
+        document.addEventListener('DOMContentLoaded', function () {
+            document.body.classList.remove('verify-email-mode');
+            var nav = document.getElementById('bottom-nav');
+            if (nav && nav.style.display === 'none') nav.style.display = '';
+        });
+        if ('caches' in window) {
+            caches.keys().then(function(keys) {
+                return Promise.all(keys.filter(function(k){ return /^minijob-finder-v\d+/.test(k) && k !== 'minijob-finder-v17'; }).map(function(k){ return caches.delete(k); }));
+            }).catch(function(){});
+        }
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(regs) {
+                regs.forEach(function(reg) { reg.update && reg.update(); });
+            }).catch(function(){});
+        }
+    } catch(e) {}
+})();
+</script>
+
 <body data-theme="light" data-device="desktop" data-orientation="landscape">
 <div id="app">
     <div id="app-header-container"></div>
@@ -303,23 +327,24 @@
     window.MINIJOB_BACKEND_MODE = "firebase";
 </script>
 
-<script src="assets/js/core.js"></script>
-<script src="assets/js/backend.js"></script>
-<script src="assets/js/device.js"></script>
-<script src="assets/js/theme.js"></script>
-<script src="assets/js/navigation.js"></script>
-<script src="assets/js/cookies.js"></script>
-<script src="assets/js/social.js"></script>
-<script src="assets/js/auth.js"></script>
-<script src="assets/js/chat.js"></script>
-<script src="assets/js/notifications.js"></script>
-<script src="assets/js/jobs.js"></script>
-<script src="assets/js/map.js"></script>
-<script src="assets/js/profile.js"></script>
-<script src="assets/js/features.js"></script>
-<script src="assets/js/quality.js"></script>
-<script src="assets/js/security-quality.js"></script>
-<script src="assets/js/minijob-limit.js"></script>
-<script src="assets/js/app-init.js"></script>
+<script src="assets/js/core.js?v=v17"></script>
+<script src="assets/js/backend.js?v=v17"></script>
+<script src="assets/js/device.js?v=v17"></script>
+<script src="assets/js/theme.js?v=v17"></script>
+<script src="assets/js/navigation.js?v=v17"></script>
+<script src="assets/js/cookies.js?v=v17"></script>
+<script src="assets/js/social.js?v=v17"></script>
+<script src="assets/js/auth.js?v=v17"></script>
+<script src="assets/js/chat.js?v=v17"></script>
+<script src="assets/js/notifications.js?v=v17"></script>
+<script src="assets/js/jobs.js?v=v17"></script>
+<script src="assets/js/map.js?v=v17"></script>
+<script src="assets/js/profile.js?v=v17"></script>
+<script src="assets/js/features.js?v=v17"></script>
+<script src="assets/js/quality.js?v=v17"></script>
+<script src="assets/js/security-quality.js?v=v17"></script>
+<script src="assets/js/minijob-limit.js?v=v17"></script>
+<script src="assets/js/remove-verify-email.js?v=v17"></script>
+<script src="assets/js/app-init.js?v=v17"></script>
 </body>
 </html>
