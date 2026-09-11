@@ -70,3 +70,16 @@
     });
     window.addEventListener('orientationchange', () => setTimeout(applyDevice, 200));
 })();
+
+
+// ---------- Mobile viewport stabilisieren ----------
+function updateMobileViewportVars() {
+    try {
+        document.documentElement.style.setProperty('--app-vh', `${window.innerHeight * 0.01}px`);
+        document.body.setAttribute('data-orientation', window.innerWidth > window.innerHeight ? 'landscape' : 'portrait');
+        document.documentElement.setAttribute('data-orientation', window.innerWidth > window.innerHeight ? 'landscape' : 'portrait');
+    } catch(e) {}
+}
+window.addEventListener('resize', updateMobileViewportVars, { passive: true });
+window.addEventListener('orientationchange', () => setTimeout(updateMobileViewportVars, 120), { passive: true });
+document.addEventListener('DOMContentLoaded', updateMobileViewportVars);
