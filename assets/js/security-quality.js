@@ -379,17 +379,32 @@ if (typeof afterSuccessfulAuth === 'function' && !afterSuccessfulAuth.__emailVer
         try {
             if (auth.currentUser && auth.currentUser.providerData.some(p => p.providerId === 'password') && !auth.currentUser.emailVerified) {
                 currentUser = auth.currentUser;
-                document.getElementById('main-content').innerHTML = `<div class="form-page">
+                document.body.classList.add('verify-email-mode');
+                const nav = document.getElementById('bottom-nav');
+                if (nav) {
+                    nav.classList.add('hidden');
+                    nav.style.display = 'none';
+                }
+                const header = document.getElementById('app-header-container');
+                if (header) header.innerHTML = '';
+                document.getElementById('main-content').innerHTML = `<div class="form-page verify-email-page">
                     <div class="card verify-email-card" style="cursor:auto">
                         <h2>E-Mail bestätigen</h2>
                         <p>Du musst deine E-Mail-Adresse bestätigen, bevor du die App benutzen kannst.</p>
-                        <p class="small-muted">${escapeHtml(auth.currentUser.email || '')}</p>
-                        <button class="btn btn-primary" onclick="resendVerificationMail()">Bestätigung erneut senden</button>
-                        <button class="btn btn-outline" onclick="auth.currentUser.reload().then(()=>location.reload())">Ich habe bestätigt</button>
-                        <button class="btn btn-danger" onclick="logout()">Abmelden</button>
+                        <div class="verify-status-box">
+                            <strong>Angemeldete E-Mail</strong>
+                            <p class="small-muted">${escapeHtml(auth.currentUser.email || '')}</p>
+                        </div>
+                        <p class="small-muted">
+                            Öffne dein E-Mail-Postfach, klicke auf den Bestätigungslink und komme danach hierher zurück.
+                        </p>
+                        <div class="verification-actions">
+                            <button class="btn btn-primary" onclick="resendVerificationMail()">Bestätigung erneut senden</button>
+                            <button class="btn btn-outline" onclick="auth.currentUser.reload().then(()=>location.reload())">Ich habe bestätigt</button>
+                            <button class="btn btn-danger" onclick="logout()">Abmelden</button>
+                        </div>
                     </div>
                 </div>`;
-                document.getElementById('bottom-nav')?.classList.add('hidden');
                 return;
             }
         } catch(e) {}
