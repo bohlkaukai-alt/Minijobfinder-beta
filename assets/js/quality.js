@@ -248,25 +248,8 @@ showChatsScreen = function() {
     chatsUnsubscribe = db.collection('chats')
         .where('participants', 'array-contains', currentUser.uid)
         .onSnapshot(async snap => {
-            // Calculate total unread from ALL chats (before filtering)
-            let totalUnread = 0;
-            snap.docs.forEach(d => { totalUnread += Number(d.data().unreadCounts?.[currentUser.uid] || 0); });
-            // Update nav badge
-            document.querySelectorAll('[data-page="chats"]').forEach(btn => {
-                let b = btn.querySelector('.nav-badge');
-                if (totalUnread && !b) { b = document.createElement('b'); b.className='nav-badge'; btn.appendChild(b); }
-                if (b) { b.textContent = totalUnread > 99 ? '99+' : String(totalUnread); b.style.display = totalUnread ? 'inline-flex' : 'none'; }
-            });
-
-            const unDeletedIds = [];
             const docs = snap.docs
-                .filter(d => {
-                    const isDeleted = qIsDeletedChat(d.id) || d.data().deletedFor?.[currentUser.uid];
-                    if (!isDeleted) return true;
-                    const unread = Number(d.data().unreadCounts?.[currentUser.uid] || 0);
-                    if (unread > 0) { unDeletedIds.push(d.id); return true; }
-                    return false;
-                })
+                .filter(d => !qIsDeletedChat(d.id) && !d.data().deletedFor?.[currentUser.uid])
                 .map(d => ({ id: d.id, data: d.data() }))
                 .sort((a,b) => {
                     const pinDiff = Number(qIsPinned(b.id, b.data)) - Number(qIsPinned(a.id, a.data));
@@ -287,7 +270,7 @@ showChatsScreen = function() {
                 const pinned = qIsPinned(item.id, c);
                 const initial = escapeHtml((qPreviewName(c, other).charAt(0) || 'C').toUpperCase());
                 return `<div class="card chat-row ${pinned ? 'pinned' : ''}" onclick="navigateTo('chat','${item.id}')">
-                    <div class="chat-avatar" style="background:${escapeHtml(other?.profileColor || '#2563EB'}">${initial}</div>
+                    <div class="chat-avatar" style="background:${escapeHtml(other?.profileColor || '#2563EB')}">${initial}</div>
                     <div class="chat-row-main">
                         <div class="chat-title-line"><strong>${escapeHtml(qPreviewName(c, other))}</strong>${pinned ? '<span class="pinned-mini">📌</span>' : ''}</div>
                         <p class="small-muted">${escapeHtml(c.jobTitle || '')}</p>
@@ -301,14 +284,6 @@ showChatsScreen = function() {
                 </div>`;
             }));
             document.getElementById('main-content').innerHTML = tabsHtml + `<div class="chat-list-page">${rows.join('')}</div>`;
-
-            if (unDeletedIds.length) {
-                const localList = qReadList(localDeletedChatsKey()).filter(id => !unDeletedIds.includes(id));
-                qWriteList(localDeletedChatsKey(), localList);
-                unDeletedIds.forEach(id => {
-                    db.collection('chats').doc(id).set({ deletedFor: { [currentUser.uid]: false } }, { merge: true }).catch(()=>{});
-                });
-            }
         }, err => {
             document.getElementById('main-content').innerHTML = tabsHtml + `<div class="empty-state">Chat-Fehler: ${escapeHtml(err.message)}</div>`;
         });

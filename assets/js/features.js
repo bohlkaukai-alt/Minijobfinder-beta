@@ -59,7 +59,7 @@ showRegister = function() {
             <div id="auth-error" class="auth-error hidden"></div>
             <input id="reg-name" class="form-input" placeholder="Name" autocomplete="name">
             <input id="reg-city" class="form-input" placeholder="Wohnort / Stadt" autocomplete="address-level2">
-            <input id="reg-email" class="form-input" placeholder="E-Mail" autocomplete="email">
+            <input id="reg-email" type="email" inputmode="email" autocomplete="email" class="form-input" placeholder="E-Mail" autocomplete="email">
             <input id="reg-password" type="password" class="form-input" placeholder="Passwort" autocomplete="new-password">
             <input id="reg-birthdate" type="date" class="form-input">
             <div class="device-choice compact"><button onclick="setManualDevice('mobile')">Handy</button><button onclick="setManualDevice('tablet')">Tablet/iPad</button><button onclick="setManualDevice('desktop')">PC</button></div>
@@ -453,17 +453,7 @@ showChatsScreen = function() {
     chatsUnsubscribe = db.collection('chats').where('participants','array-contains',currentUser.uid).onSnapshot(async snap => {
         if (snap.empty) { document.getElementById('main-content').innerHTML = '<div class="empty-state">Noch keine Chats</div>'; return; }
         const chats = snap.docs.map(d => ({ id:d.id, data:d.data() })).sort((a,b)=>(b.data.updatedAt?.toMillis?.()||0)-(a.data.updatedAt?.toMillis?.()||0));
-        
-        // Calculate total unread and update nav badge
-        let totalUnread = 0;
-        snap.docs.forEach(d => { totalUnread += Number(d.data().unreadCounts?.[currentUser.uid] || 0); });
-        document.querySelectorAll('[data-page="chats"]').forEach(btn => {
-            let b = btn.querySelector('.nav-badge');
-            if (totalUnread && !b) { b = document.createElement('b'); b.className='nav-badge'; btn.appendChild(b); }
-            if (b) { b.textContent = totalUnread > 99 ? '99+' : String(totalUnread); b.style.display = totalUnread ? 'inline-flex' : 'none'; }
-        });
-        
-        const rows = await Promise.all(chats.map(async item => { const c = item.data; const other = await getUserCached(getOtherParticipant(c)); const unread = c.unreadCounts?.[currentUser.uid] || 0; return `<div class="card chat-row ${c.pinnedBy?.[currentUser.uid]?'pinned':''}" onclick="navigateTo('chat','${item.id}')"><div class="chat-avatar" style="background:${escapeHtml(other?.profileColor || '#2563EB'}">${escapeHtml((other?.name||'?').charAt(0).toUpperCase())}</div><div class="chat-row-main"><strong>${escapeHtml(other?.name || c.jobTitle || 'Chat')}</strong><p class="small-muted">${escapeHtml(c.jobTitle || '')}</p><p class="small-muted">${escapeHtml(c.lastMessage || 'Noch keine Nachricht')}</p></div><div class="chat-row-side"><span>${formatRelative(c.updatedAt)}</span>${unread ? `<b class="nav-badge">${unread > 99 ? '99+' : unread}</b>` : ''}</div></div>`; }));
+        const rows = await Promise.all(chats.map(async item => { const c = item.data; const other = await getUserCached(getOtherParticipant(c)); const unread = c.unreadCounts?.[currentUser.uid] || 0; return `<div class="card chat-row ${c.pinnedBy?.[currentUser.uid]?'pinned':''}" onclick="navigateTo('chat','${item.id}')"><div class="chat-avatar" style="background:${escapeHtml(other?.profileColor || '#2563EB')}">${escapeHtml((other?.name||'?').charAt(0).toUpperCase())}</div><div class="chat-row-main"><strong>${escapeHtml(other?.name || c.jobTitle || 'Chat')}</strong><p class="small-muted">${escapeHtml(c.jobTitle || '')}</p><p class="small-muted">${escapeHtml(c.lastMessage || 'Noch keine Nachricht')}</p></div><div class="chat-row-side"><span>${formatRelative(c.updatedAt)}</span>${unread ? `<b class="nav-badge">${unread}</b>` : ''}</div></div>`; }));
         document.getElementById('main-content').innerHTML = rows.join('');
     }, err => { document.getElementById('main-content').innerHTML = `<div class="empty-state">Chat-Fehler: ${escapeHtml(err.message)}</div>`; });
 };
@@ -475,10 +465,7 @@ startChatForJob = async function(jobId, applyMessage = false) {
         if (!job) { showToast('Job nicht gefunden'); return; } 
         if (job.createdBy === currentUser.uid) { showToast('Das ist dein eigener Job'); return; }
         const participants = [currentUser.uid, job.createdBy].sort(); const key = participants.join('_');
-        // Query only by jobId (no composite index needed - filter participantsKey client-side)
-        const existingSnap = await db.collection('chats').where('jobId','==',jobId).limit(50).get().catch(()=>({empty:true,docs:[]})); 
-        const existingDocs = existingSnap.docs.filter(d => d.data().participantsKey === key);
-        const existing = { empty: existingDocs.length === 0, docs: existingDocs.map(d => ({ id: d.id, data: d.data() })) }; 
+        const existing = await db.collection('chats').where('jobId','==',jobId).where('participantsKey','==',key).limit(1).get().catch(()=>({empty:true,docs:[]})); 
         let chatId;
         if (!existing.empty) chatId = existing.docs[0].id; 
         else { 
@@ -944,3 +931,40 @@ function openLocationModal() {
         </div>`;
     document.body.appendChild(modal);
 }
+
+
+// ---------- Login Passwort-Reset sichtbar machen ----------
+function ensureLoginResetButton() {
+    const loginPassword = document.getElementById('login-password');
+    if (!loginPassword || document.querySelector('.login-reset-row')) return;
+
+    const row = document.createElement('div');
+    row.className = 'login-reset-row';
+    row.innerHTML = `<button type="button" class="link-btn forgot-password-link" onclick="showForgotPassword()">Passwort vergessen?</button>`;
+
+    const loginBtn = Array.from(document.querySelectorAll('button')).find(btn =>
+        (btn.textContent || '').toLowerCase().includes('einloggen')
+    );
+
+    if (loginBtn) loginBtn.insertAdjacentElement('afterend', row);
+    else loginPassword.insertAdjacentElement('afterend', row);
+}
+
+(function () {
+    const oldShowLoginScreen = window.showLoginScreen || (typeof showLoginScreen === 'function' ? showLoginScreen : null);
+    if (oldShowLoginScreen && !oldShowLoginScreen.__resetButtonWrapped) {
+        const wrapped = function () {
+            const result = oldShowLoginScreen.apply(this, arguments);
+            setTimeout(ensureLoginResetButton, 50);
+            return result;
+        };
+        wrapped.__resetButtonWrapped = true;
+        window.showLoginScreen = wrapped;
+        try { showLoginScreen = wrapped; } catch(e) {}
+    }
+
+    const observer = new MutationObserver(() => {
+        if (document.getElementById('login-password')) ensureLoginResetButton();
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+})();

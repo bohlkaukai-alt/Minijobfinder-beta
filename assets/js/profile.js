@@ -14,6 +14,7 @@ function showProfileScreen() {
         <div class="card" onclick="navigateTo('edit-profile')"><strong>Profil bearbeiten</strong></div>
         
         <div class="settings-item" onclick="openCookieSettings()"><span>🍪 Cookies & Speicher</span><span>Ändern</span></div>
+        ${isAdmin() ? '<div class="settings-item" onclick="window.open(\'admin.html\',\'_blank\')"><span>🛡️ Admin-Bereich</span><span>Öffnen</span></div>' : ''}
         <div class="settings-item" onclick="window.open('datenschutz.html','_blank')"><span>🔐 Datenschutzerklärung</span><span>Öffnen</span></div>
         <div class="settings-item danger-link" onclick="deleteMyAccount()"><span>🗑️ Account löschen</span><span>Löschen</span></div>
 

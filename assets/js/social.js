@@ -29,6 +29,7 @@ function socialFooterMarkup() {
     return `<div class="social-footer">
         <a href="impressum.html">Impressum</a>
         <a href="datenschutz.html">Datenschutz</a>
+        <a href="admin.html">Admin</a>
         <a data-social="instagram" href="${window.MINIJOB_SOCIAL_LINKS.instagram}" target="_blank" rel="noopener">Instagram</a>
         <a data-social="tiktok" href="${window.MINIJOB_SOCIAL_LINKS.tiktok}" target="_blank" rel="noopener">TikTok</a>
         <a data-social="facebook" href="${window.MINIJOB_SOCIAL_LINKS.facebook}" target="_blank" rel="noopener">Facebook</a>

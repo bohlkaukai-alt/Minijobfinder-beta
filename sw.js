@@ -1,4 +1,4 @@
-const CACHE_NAME = 'minijob-finder-v4';
+const CACHE_NAME = 'minijob-finder-v15';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -22,6 +22,20 @@ const CORE_ASSETS = [
   './assets/js/app-init.js',
   './impressum.html',
   './datenschutz.html'
+,
+  './passwort-zuruecksetzen.html'
+,
+  './admin.html'
+,
+  './assets/js/admin.js'
+,
+  './firestore.rules.admin-example'
+,
+  './assets/js/security-quality.js'
+,
+  './assets/js/minijob-limit.js'
+,
+  './assets/data/minijob-limit-fallback.json'
 ];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(CORE_ASSETS)).catch(() => null));
