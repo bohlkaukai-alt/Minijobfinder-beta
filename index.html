@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>MiniJob Finder</title>
+    <meta name="theme-color" content="#2563EB">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="description" content="MiniJob Finder Web-App">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Poppins:wght@600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+
+    <style id="critical-app-fallback-css">
+        :root {
+            --primary-blue: #2563EB;
+            --accent-orange: #F97316;
+            --success: #22C55E;
+            --danger: #EF4444;
+            --bg: #EEF4FF;
+            --bg-2: #F8FAFC;
+            --surface: rgba(255,255,255,.92);
+            --surface-solid: #FFFFFF;
+            --text: #0F172A;
+            --text-secondary: #64748B;
+            --border: rgba(15,23,42,.10);
+            --shadow-card: 0 18px 45px rgba(15, 23, 42, .12);
+            --chip-bg: rgba(37, 99, 235, .08);
+        }
+        * { box-sizing: border-box; }
+        html, body {
+            margin: 0;
+            min-height: 100%;
+            font-family: Nunito, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: linear-gradient(135deg, var(--bg), var(--bg-2));
+            color: var(--text);
+        }
+        body.verify-email-mode .bottom-nav,
+        body.verify-email-mode #bottom-nav {
+            display: none !important;
+        }
+        #app {
+            min-height: 100vh;
+            width: min(100%, 1180px);
+            margin: 0 auto;
+            padding: max(14px, env(safe-area-inset-top)) 14px max(20px, env(safe-area-inset-bottom));
+        }
+        .main-content {
+            width: 100%;
+            min-height: calc(100vh - 60px);
+        }
+        .form-page {
+            width: min(100%, 720px);
+            margin: 0 auto;
+            padding: 18px 0 28px;
+        }
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            box-shadow: var(--shadow-card);
+            padding: 18px;
+        }
+        .verify-email-card {
+            width: min(100%, 680px);
+            margin: 18px auto;
+            text-align: left;
+        }
+        .verify-email-card h2,
+        .form-page h2 {
+            font-family: Poppins, Nunito, system-ui, sans-serif;
+            font-size: clamp(28px, 7vw, 44px);
+            line-height: 1.05;
+            letter-spacing: -0.04em;
+            margin: 0 0 12px;
+        }
+        .verify-email-card p {
+            font-size: 16px;
+            line-height: 1.45;
+            margin: 8px 0;
+        }
+        .small-muted {
+            color: var(--text-secondary);
+            font-size: 13px !important;
+            word-break: break-word;
+        }
+        .btn {
+            appearance: none;
+            border: 0;
+            border-radius: 999px;
+            padding: 12px 15px;
+            font: inherit;
+            font-weight: 900;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            margin: 6px 6px 0 0;
+            text-decoration: none;
+        }
+        .btn-primary,
+        .btn-accent {
+            color: white;
+            background: linear-gradient(135deg, var(--primary-blue), #1D4ED8);
+        }
+        .btn-outline {
+            color: var(--primary-blue);
+            background: var(--chip-bg);
+            border: 1px solid rgba(37,99,235,.22);
+        }
+        .btn-danger {
+            color: white;
+            background: var(--danger);
+        }
+        .verification-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 16px;
+        }
+        .verify-status-box {
+            background: rgba(37,99,235,.07);
+            border: 1px solid rgba(37,99,235,.16);
+            border-radius: 18px;
+            padding: 12px;
+            margin: 14px 0;
+        }
+        .hidden { display: none !important; }
+        .toast {
+            position: fixed;
+            left: 50%;
+            bottom: max(22px, env(safe-area-inset-bottom));
+            transform: translateX(-50%);
+            z-index: 99999;
+            background: #0F172A;
+            color: white;
+            border-radius: 999px;
+            padding: 11px 15px;
+            box-shadow: 0 12px 32px rgba(0,0,0,.25);
+            font-weight: 800;
+            max-width: calc(100vw - 28px);
+            text-align: center;
+        }
+        .app-footer {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            padding: 18px 8px;
+            font-size: 13px;
+        }
+        .app-footer a {
+            color: var(--primary-blue);
+            font-weight: 800;
+            text-decoration: none;
+        }
+        .app-footer a:hover { text-decoration: underline; }
+        @media (max-width: 640px) {
+            #app { padding-left: 14px; padding-right: 14px; }
+            .card { border-radius: 22px; padding: 16px; }
+            .btn { width: 100%; margin-right: 0; }
+            .verification-actions { display: grid; grid-template-columns: 1fr; }
+        }
+    </style>
+
+    <script>
+        (function () {
+            try {
+                var theme = localStorage.getItem('app_theme') || 'light';
+                document.documentElement.setAttribute('data-theme', theme);
+
+                var ua = navigator.userAgent || '';
+                var width = Math.min(window.innerWidth || screen.width || 0, screen.width || window.innerWidth || 0);
+                var isIPad = /iPad/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+                var isTabletUA = /Tablet|Android(?!.*Mobile)|Silk|Kindle|PlayBook/.test(ua);
+                var isMobileUA = /Mobi|Android|iPhone|iPod|Windows Phone/.test(ua) && !isIPad && !isTabletUA;
+                var device = 'desktop';
+                if (isMobileUA || width <= 640) device = 'mobile';
+                else if (isIPad || isTabletUA || width <= 1024) device = 'tablet';
+                document.documentElement.setAttribute('data-device', device);
+                document.documentElement.setAttribute('data-orientation', window.innerWidth > window.innerHeight ? 'landscape' : 'portrait');
+            } catch (e) {
+                document.documentElement.setAttribute('data-theme', 'light');
+                document.documentElement.setAttribute('data-device', 'desktop');
+            }
+        })();
+    </script>
+</head>
+<body data-theme="light" data-device="desktop" data-orientation="landscape">
+<div id="app">
+    <div id="app-header-container"></div>
+    <div class="main-content" id="main-content"></div>
+    <nav class="bottom-nav hidden" id="bottom-nav">
+        <button class="nav-item active" data-page="jobs" onclick="setActiveNav(this); navigateTo('jobs')"><span class="material-icons">home</span><span>Start</span></button>
+        <button class="nav-item" data-page="map" onclick="setActiveNav(this); navigateTo('map')"><span class="material-icons">map</span><span>Karte</span></button>
+        <button class="nav-item" data-page="create" onclick="setActiveNav(this); navigateTo('create')"><span class="material-icons">add_circle_outline</span><span>Neu</span></button>
+        <button class="nav-item" data-page="chats" onclick="setActiveNav(this); navigateTo('chats')"><span class="material-icons">chat_bubble_outline</span><span>Chat</span></button>
+        <button class="nav-item" data-page="profile" onclick="setActiveNav(this); navigateTo('profile')"><span class="material-icons">person_outline</span><span>Profil</span></button>
+    </nav>
+</div>
+<input type="file" id="chat-image-upload" accept="image/*" style="display:none">
+
+<script>
+    (function () {
+        try {
+            document.body.setAttribute('data-theme', document.documentElement.getAttribute('data-theme') || 'light');
+            document.body.setAttribute('data-device', document.documentElement.getAttribute('data-device') || 'desktop');
+            document.body.setAttribute('data-orientation', document.documentElement.getAttribute('data-orientation') || 'landscape');
+        } catch (e) {}
+    })();
+</script>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    window.MINIJOB_FIREBASE_CONFIG = {
+        apiKey: "AIzaSyBx57dh1O6NoLahmoYFSm0byLzzyKJKhj8",
+        authDomain: "minijob-41400.firebaseapp.com",
+        projectId: "minijob-41400",
+        storageBucket: "minijob-41400.firebasestorage.app",
+        messagingSenderId: "910969132661",
+        appId: "1:910969132661:web:1507192ed39cd897db4a3c"
+    };
+    window.MINIJOB_BACKEND_MODE = "firebase";
+</script>
+
+<script src="assets/js/core.js"></script>
+<script src="assets/js/backend.js"></script>
+<script src="assets/js/device.js"></script>
+<script src="assets/js/theme.js"></script>
+<script src="assets/js/navigation.js"></script>
+<script src="assets/js/cookies.js"></script>
+<script src="assets/js/social.js"></script>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/chat.js"></script>
+<script src="assets/js/notifications.js"></script>
+<script src="assets/js/jobs.js"></script>
+<script src="assets/js/map.js"></script>
+<script src="assets/js/profile.js"></script>
+<script src="assets/js/features.js"></script>
+<script src="assets/js/quality.js"></script>
+<script src="assets/js/security-quality.js"></script>
+<script src="assets/js/minijob-limit.js"></script>
+<script src="assets/js/app-init.js"></script>
+</body>
+</html>
